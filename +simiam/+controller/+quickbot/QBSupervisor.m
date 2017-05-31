@@ -13,6 +13,8 @@ classdef QBSupervisor < simiam.controller.Supervisor
 
 % Copyright (C) 2013, Georgia Tech Research Corporation
 % see the LICENSE file included with this software
+%
+% Updated by Salman Hashmi
 
     properties
     %% PROPERTIES
@@ -82,8 +84,8 @@ classdef QBSupervisor < simiam.controller.Supervisor
             obj.prev_ticks = struct('left', 0, 'right', 0);
             
             obj.theta_d     = pi/4;
-            obj.v           = 0.15;
-            obj.goal        = [-1, 1];
+            obj.v           = 0.20;
+            obj.goal        = [-1, -1];
             obj.d_stop      = 0.05;
             obj.d_at_obs    = 0.25;                
             obj.d_unsafe    = 0.10;
@@ -127,10 +129,14 @@ classdef QBSupervisor < simiam.controller.Supervisor
                     obj.switch_to_state('stop');
                 else
                     if(obj.check_event('at_obstacle'))
-                        obj.switch_to_state('avoid_obstacles');
+                        obj.switch_to_state('ao_and_gtg');
                     else
-                        if(obj.check_event('obstacle_cleared'))
-                            obj.switch_to_state('go_to_goal');
+                        if(obj.check_event('unsafe'))
+                            obj.switch_to_state('avoid_obstacles');
+                        else
+                            if(obj.check_event('obstacle_cleared'))
+                              obj.switch_to_state('go_to_goal');
+                            end
                         end
                     end
                 end
