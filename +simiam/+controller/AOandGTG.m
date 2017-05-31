@@ -2,6 +2,8 @@ classdef AOandGTG < simiam.controller.Controller
 
 % Copyright (C) 2013, Georgia Tech Research Corporation
 % see the LICENSE file included with this software
+%
+% Updated by Salman Hashmi
 
     properties
         
@@ -72,8 +74,13 @@ classdef AOandGTG < simiam.controller.Controller
             
             %% START CODE BLOCK %%
             
-            % 3. Blend the two vectors
-            u_ao_gtg = zeros(2,1);
+            % normalize u_ao and u_gtg
+            u_ao = u_ao/norm(u_ao);
+            u_gtg = u_gtg/norm(u_gtg);
+            
+            % 3. Blend the two vectors in a linear fashion
+            weight = 0.70;
+            u_ao_gtg = weight*u_ao + (1-weight)*u_gtg;
             
             %% END CODE BLOCK %%
             
