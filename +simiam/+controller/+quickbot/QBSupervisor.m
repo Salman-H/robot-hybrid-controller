@@ -83,12 +83,12 @@ classdef QBSupervisor < simiam.controller.Supervisor
                                
             obj.prev_ticks = struct('left', 0, 'right', 0);
             
-            obj.theta_d     = pi/4;
-            obj.v           = 0.20;
-            obj.goal        = [-1, -1];
+            obj.theta_d     = 1.15; % 1.047 ~ 60 deg. originally pi/4;
+            obj.v           = 0.07;
+            obj.goal        = [-1, 1];
             obj.d_stop      = 0.05;
             obj.d_at_obs    = 0.25;                
-            obj.d_unsafe    = 0.10;
+            obj.d_unsafe    = 0.16; % originally 0.10;
             
             obj.is_blending = false;
             
@@ -125,21 +125,18 @@ classdef QBSupervisor < simiam.controller.Supervisor
             else
                 %% START CODE BLOCK %%
                 
-                if(obj.check_event('at_goal'))
-                    obj.switch_to_state('stop');
-                else
-                    if(obj.check_event('at_obstacle'))
+                event = obj.get_event();
+                switch event
+                    case 'at_goal'
+                        obj.switch_to_state('stop');
+                    case 'at_obstacle'
                         obj.switch_to_state('ao_and_gtg');
-                    else
-                        if(obj.check_event('unsafe'))
-                            obj.switch_to_state('avoid_obstacles');
-                        else
-                            if(obj.check_event('obstacle_cleared'))
-                              obj.switch_to_state('go_to_goal');
-                            end
-                        end
-                    end
+                    case 'usafe'
+                        obj.switch_to_state('avoid_obstacles');
+                    case 'obstacle_cleared'
+                        obj.switch_to_state('go_to_goal');
                 end
+                
                 %% END CODE BLOCK %%
             end
             
@@ -308,6 +305,17 @@ classdef QBSupervisor < simiam.controller.Supervisor
            % return code (rc)
            fprintf('no event exists with name %s\n', name);
            rc = false;
+        end
+        
+        
+        % added function to return the name of the event that has occurred
+        function rc = get_event(obj)
+            for i=1:numel(obj.eventsd)
+                if(obj.eventsd{i}.callback(obj, obj.states{obj.current_state}, obj.robot))
+                    rc = obj.eventsd{i}.event;
+                    return;
+                end
+            end
         end
         
         %% Odometry
